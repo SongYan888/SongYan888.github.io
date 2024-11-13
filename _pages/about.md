@@ -14,6 +14,8 @@ Recent research in: <br>💗image restoration,<br> 💗cross-domain image transl
 
 Recent developments:<br>
 Submit a paper to ISPRS JPRS<br>
+Submit a paper to Neural Networks<br>
+Submit a paper to AAAI2025<br>
 Submit a paper to CVPR2025<br>
 TODO: Write a paper and submit it to ICML2025<br>
 
