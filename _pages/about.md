@@ -20,4 +20,4 @@ Submit a paper to CVPR2025<br>
 TODO: Write a paper and submit it to ICML2025<br>
 
 You can contact me here:<br>
-[Email](gary_144@outlook.com) / [Github](https://github.com/SongYan888)
+Email: gary_144@outlook.com / Github: https://github.com/SongYan888
