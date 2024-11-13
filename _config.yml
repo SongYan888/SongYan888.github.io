@@ -24,7 +24,7 @@ author:
   avatar           : "img.png"
   name             : "Song Yan"
   pronouns         : # example: "she/her"  
-  bio              : "Short biography for the left-hand sidebar"
+  #bio              : "Short biography for the left-hand sidebar"
   location         : "China,ShanXi,Xi'an"
   employer         : "Xi’an High-tech Research Institute"
   uri              : # URL
