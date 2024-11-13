@@ -15,9 +15,13 @@ Recent research in: <br>💗image restoration,<br> 💗cross-domain image transl
 Recent developments:<br>
 Submit a paper to ISPRS JPRS<br>
 Submit a paper to Neural Networks<br>
-Submit a paper to AAAI2025<br>
-Submit a paper to CVPR2025<br>
+Submit a paper to AAAI 2025<br>
+Submit a paper to CVPR 2025<br>
 TODO: Write a paper and submit it to ICML2025<br>
 
 You can contact me here:<br>
-Email: gary_144@outlook.com / Github: https://github.com/SongYan888
+Email: gary_144@outlook.com<br>Github: https://github.com/SongYan888<br><br><br>
+My co-authors:
+[YanCheng Cai](https://caiyancheng.github.io/academic_chinese.html)<br>
+[Ming Wang](https://github.com/miingwang)<br>
+[Yao Gou](https://github.com/gouayao)<br>
