@@ -3,802 +3,1132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dr. Gary USTC</title>
+    <title>Gary | AI研究员 - 扩散模型与多模态大模型</title>
     
-    <!-- 核心库引入 -->
-    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js"></script>
-    
-    <!-- Iconfont图标库 -->
-    <link rel="stylesheet" href="https://at.alicdn.com/t/font_2506819_1tyq9zyxuss.css">
+    <!-- 字体和图标库 - 增加了Syncopate字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&family=Syncopate:wght@400;700&family=Audiowide&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* ==================== 核心变量 - 危险美学配色 ==================== */
-        :root {
-            --neon-pink: #FF006E;
-            --acid-green: #00FF41;
-            --cyber-cyan: #00F5FF;
-            --beast-red: #FF3131;
-            --deep-black: #0A0A0A;
-            --holographic: linear-gradient(45deg, #FF006E, #00F5FF, #00FF41);
-            --mouse-x: 0.5;
-            --mouse-y: 0.5;
-        }
-
-        /* ==================== 基础重置 ==================== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'JetBrains Mono', 'Consolas', monospace;
-            background: var(--deep-black);
-            color: var(--cyber-cyan);
-            overflow-x: hidden;
-            cursor: crosshair;
+        :root {
+            --neon-pink: #ff006e;
+            --neon-cyan: #00f5ff;
+            --neon-purple: #8b00ff;
+            --neon-yellow: #ffea00;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #050505;
+            --glow-cyan: 0 0 10px #00f5ff, 0 0 20px #00f5ff, 0 0 30px #00f5ff;
+            --glow-pink: 0 0 10px #ff006e, 0 0 20px #ff006e, 0 0 30px #ff006e;
+            --glow-purple: 0 0 10px #8b00ff, 0 0 20px #8b00ff, 0 0 30px #8b00ff;
         }
 
-        /* 新野兽派背景纹理 - 喷溅网点 */
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--darker-bg);
+            color: #fff;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* 自定义光标 */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            transition: transform 0.1s;
+            z-index: 9999;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 245, 255, 0.1);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            transition: transform 0.3s;
+            z-index: 9998;
+        }
+
+        /* 扫描线效果 */
         body::before {
             content: '';
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 50%, var(--beast-red) 1px, transparent 1px),
-                radial-gradient(circle at 80% 80%, var(--acid-green) 1px, transparent 1px);
-            background-size: 100px 100px;
-            opacity: 0.08;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        /* ==================== 加载动画 - 油漆飞溅 ==================== */
-        .loader {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: var(--deep-black);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .splash-svg {
-            position: absolute;
-            width: 100%; height: 100%;
-        }
-
-        .acid-text {
-            font-size: 3rem;
-            font-weight: 900;
-            letter-spacing: 0.2em;
-            background: var(--holographic);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: hue-rotate 2s linear infinite;
-        }
-
-        @keyframes hue-rotate {
-            100% { filter: hue-rotate(360deg); }
-        }
-
-        /* ==================== 导航栏 - 撕裂边缘 ==================== */
-        .nav-torn {
-            position: fixed;
-            top: 0; width: 100%;
-            background: var(--deep-black);
-            border-bottom: 3px solid var(--beast-red);
-            padding: 20px 50px;
-            z-index: 1000;
-            clip-path: polygon(
-                0 0, 100% 0, 100% 85%, 98% 90%, 96% 85%, 94% 92%,
-                92% 85%, 90% 90%, 88% 85%, 86% 92%, 84% 85%, 82% 90%,
-                80% 85%, 78% 92%, 76% 85%, 74% 90%, 72% 85%, 70% 92%,
-                68% 85%, 66% 90%, 64% 85%, 62% 92%, 60% 85%, 58% 90%,
-                56% 85%, 54% 92%, 52% 85%, 50% 90%, 48% 85%, 46% 92%,
-                44% 85%, 42% 90%, 40% 85%, 38% 92%, 36% 85%, 34% 90%,
-                32% 85%, 30% 92%, 28% 85%, 26% 90%, 24% 85%, 22% 92%,
-                20% 85%, 18% 90%, 16% 85%, 14% 92%, 12% 85%, 10% 90%,
-                8% 85%, 6% 92%, 4% 85%, 2% 90%, 0 85%
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(0, 245, 255, 0.03) 50%,
+                transparent 50%
             );
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background-size: 100% 4px;
+            z-index: 1000;
+            pointer-events: none;
+            animation: scanlines 8s linear infinite;
         }
 
-        .nav-torn:hover {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            border-bottom-color: var(--acid-green);
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
         }
 
-        .nav-torn ul {
-            list-style: none;
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .nav-container {
             display: flex;
-            justify-content: center;
-            gap: 40px;
-        }
-
-        .nav-torn a {
-            color: var(--neon-pink);
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 700;
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            position: relative;
         }
 
-        .nav-torn a::after {
+        .logo {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            position: relative;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .nav-links a::after {
             content: '';
             position: absolute;
-            bottom: -5px; left: 0;
-            width: 0; height: 2px;
-            background: var(--acid-green);
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--neon-pink);
             transition: width 0.3s;
+            box-shadow: var(--glow-pink);
         }
 
-        .nav-torn a:hover {
-            color: var(--acid-green);
-            transform: translateY(-2px);
-        }
-
-        .nav-torn a:hover::after {
+        .nav-links a:hover::after {
             width: 100%;
         }
 
-        /* 图标酸性效果 */
-        .icon-acid {
-            font-size: 1.5rem;
-            background: var(--holographic);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: hue-rotate 3s linear infinite;
+        .nav-links a:hover {
+            color: var(--neon-pink);
+            text-shadow: var(--glow-pink);
         }
 
-        /* ==================== 主内容区 ==================== */
-        main {
-            margin-top: 120px;
-            padding: 0 50px 50px;
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 50px;
         }
 
-        .section {
-            min-height: 100vh;
-            padding: 80px 0;
-            border-bottom: 1px dashed var(--beast-red);
+        /* Hero 区域 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 动态背景粒子 */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 10s infinite;
+            box-shadow: var(--glow-cyan);
+        }
+
+        @keyframes float {
+            0% {
+                opacity: 0;
+                transform: translateY(100vh) scale(0);
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                opacity: 0;
+                transform: translateY(-100vh) scale(1.5);
+            }
+        }
+
+        /* 扩散模型可视化背景 */
+        .diffusion-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0.3;
+        }
+
+        .diffusion-circle {
+            position: absolute;
+            border: 1px solid var(--neon-purple);
+            border-radius: 50%;
+            animation: diffuse 8s infinite ease-out;
+            box-shadow: var(--glow-purple);
+        }
+
+        @keyframes diffuse {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(5);
+                opacity: 0;
+            }
+        }
+
+        /* Hero 内容 */
+        .hero-content {
+            text-align: center;
+            z-index: 10;
             position: relative;
         }
 
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: radial-gradient(
-                circle at calc(var(--mouse-x) * 100%) calc(var(--mouse-y) * 100%),
-                var(--cyber-cyan) 0%, transparent 30%
-            );
-            opacity: 0.05;
-            pointer-events: none;
+        .name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 120px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            position: relative;
         }
 
-        /* ==================== 个人简介 - 液态金属头像 ==================== */
-        #about {
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .title {
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            animation: typewriter 3s steps(40) 1s both;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid var(--neon-pink);
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .subtitle {
+            font-size: 24px;
+            color: #888;
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: fadeInUp 1s 2s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 多模态图标矩阵 */
+        .multimodal-matrix {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .matrix-icon {
+            font-size: 24px;
+            color: var(--neon-purple);
+            animation: matrixPulse 4s infinite;
+            text-shadow: var(--glow-purple);
+        }
+
+        @keyframes matrixPulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* CTA 按钮 */
+        .cta-buttons {
             display: flex;
-            flex-direction: column;
+            gap: 30px;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeInUp 1s 2.5s forwards;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: 2px solid;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            border-color: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .btn-primary:hover {
+            background: var(--neon-cyan);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+        }
+
+        .btn-secondary {
+            border-color: var(--neon-pink);
+            box-shadow: var(--glow-pink);
+        }
+
+        .btn-secondary:hover {
+            background: var(--neon-pink);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink);
+        }
+
+        /* 章节通用样式 */
+        section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--neon-purple);
+            box-shadow: var(--glow-purple);
+        }
+
+        /* 关于我部分 */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .about-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        .about-text p {
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow);
+            font-weight: 600;
+        }
+
+        .about-visual {
+            position: relative;
+            height: 400px;
+            display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .metal-avatar {
-            width: 300px; height: 300px;
+        /* 脑神经网络可视化 */
+        .brain-network {
+            width: 300px;
+            height: 300px;
             position: relative;
-            margin-bottom: 40px;
-            filter: url(#liquid-metal);
         }
 
-        .metal-avatar img {
-            width: 100%; height: 100%;
+        .neuron {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--neon-pink);
             border-radius: 50%;
-            object-fit: cover;
-            border: 5px solid var(--neon-pink);
-            box-shadow: 0 0 50px var(--cyber-cyan);
+            box-shadow: var(--glow-pink);
+            animation: pulse 2s infinite;
         }
 
-        /* SVG液态金属滤镜 */
-        .svg-filters {
+        .neuron:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; }
+        .neuron:nth-child(2) { top: 40%; left: 70%; animation-delay: 0.5s; }
+        .neuron:nth-child(3) { top: 60%; left: 20%; animation-delay: 1s; }
+        .neuron:nth-child(4) { top: 80%; left: 60%; animation-delay: 1.5s; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+        }
+
+        .connection {
             position: absolute;
-            width: 0; height: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            transform-origin: left center;
+            animation: dataFlow 3s infinite;
+            box-shadow: var(--glow-cyan);
         }
 
-        .glitch-name {
-            font-size: 5rem;
-            font-weight: 900;
-            color: var(--acid-green);
-            position: relative;
-            margin-bottom: 20px;
-            letter-spacing: 0.1em;
+        @keyframes dataFlow {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
-        .glitch-name::before,
-        .glitch-name::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-        }
-
-        .glitch-name::before {
-            animation: glitch-1 0.5s infinite;
-            color: var(--neon-pink);
-            z-index: -1;
-        }
-
-        .glitch-name::after {
-            animation: glitch-2 0.5s infinite;
-            color: var(--cyber-cyan);
-            z-index: -2;
-        }
-
-        @keyframes glitch-1 {
-            0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-            20% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 2px); }
-            40% { clip-path: inset(50% 0 20% 0); transform: translate(2px, -2px); }
-            60% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 0); }
-            80% { clip-path: inset(80% 0 10% 0); transform: translate(2px, 0); }
-        }
-
-        @keyframes glitch-2 {
-            0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-            20% { clip-path: inset(60% 0 20% 0); transform: translate(2px, 0); }
-            40% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 0); }
-            60% { clip-path: inset(80% 0 10% 0); transform: translate(2px, -2px); }
-            80% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 2px); }
-        }
-
-        .beast-handwrite {
-            font-size: 1.2rem;
-            color: var(--beast-red);
-            font-style: italic;
-            opacity: 0.8;
-            position: relative;
-            padding-left: 20px;
-        }
-
-        .beast-handwrite::before {
-            content: '//';
-            position: absolute;
-            left: 0;
-            color: var(--acid-green);
-        }
-
-        /* ==================== 技能展示 - 冲突进度条 ==================== */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-
-        .skill-item h3 {
-            color: var(--neon-pink);
-            margin-bottom: 10px;
-            font-size: 1.3rem;
-        }
-
-        .skill-bar {
-            height: 40px;
-            background: var(--deep-black);
-            border: 3px solid var(--beast-red);
-            position: relative;
-            overflow: visible;
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
-        }
-
-        .skill-progress {
-            height: 100%;
-            background: var(--acid-green);
-            position: relative;
-            transition: width 2s ease-out;
-        }
-
-        .skill-progress::before {
-            content: '';
-            position: absolute;
-            left: -10px; top: -5px;
-            width: 20px; height: 20px;
-            background: var(--cyber-cyan);
-            border-radius: 50%;
-            animation: splash 0.3s ease-out infinite alternate;
-            box-shadow: 0 0 10px var(--cyber-cyan);
-        }
-
-        @keyframes splash {
-            100% { transform: scale(1.5) translateX(5px); }
-        }
-
-        .skill-level {
-            position: absolute;
-            right: 10px; top: 50%;
-            transform: translateY(-50%);
-            color: var(--deep-black);
-            font-weight: 900;
-            font-size: 1.1rem;
-        }
-
-        /* ==================== 论文卡片 - 撕裂拼贴 ==================== */
-        .papers-grid {
+        /* 研究领域 */
+        .research-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
+            gap: 40px;
         }
 
-        .paper-card {
-            background: var(--deep-black);
-            border: 2px solid var(--neon-pink);
+        .research-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(139, 0, 255, 0.3);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .research-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink), var(--neon-cyan));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+            filter: blur(10px);
+        }
+
+        .research-card:hover::before {
+            opacity: 1;
+        }
+
+        .research-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3);
+            border-color: transparent;
+        }
+
+        .research-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        .research-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--neon-pink);
+        }
+
+        .research-description {
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        /* 论文发表 */
+        .papers-container {
+            display: grid;
+            gap: 30px;
+        }
+
+        .paper-item {
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid var(--neon-cyan);
             padding: 30px;
             position: relative;
-            transition: all 0.4s;
-            clip-path: polygon(0 0, 100% 0, 95% 90%, 90% 95%, 85% 85%, 80% 95%, 75% 85%, 70% 95%, 0 100%);
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
         }
 
-        .paper-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--acid-green);
-            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.3);
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        .paper-item:hover {
+            transform: translateX(20px);
+            border-left: 3px solid var(--neon-pink);
+            box-shadow: var(--glow-pink);
         }
 
-        .paper-card h3 {
-            color: var(--cyber-cyan);
+        .paper-title {
+            font-size: 20px;
+            color: var(--neon-cyan);
+            margin-bottom: 10px;
+            text-shadow: var(--glow-cyan);
+        }
+
+        .paper-meta {
+            color: #888;
+            font-size: 14px;
             margin-bottom: 15px;
-            font-size: 1.4rem;
         }
 
-        .abstract {
+        .paper-abstract {
             color: #ccc;
             line-height: 1.6;
-            margin-bottom: 20px;
         }
 
-        .holographic-badge {
-            display: inline-block;
-            padding: 8px 20px;
-            background: var(--holographic);
-            color: var(--deep-black);
-            font-weight: 900;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
-            animation: badge-glow 2s ease-in-out infinite alternate;
+        .paper-tags {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        @keyframes badge-glow {
-            100% { filter: brightness(1.5) saturate(1.5); }
+        .tag {
+            padding: 5px 15px;
+            background: rgba(139, 0, 255, 0.2);
+            border: 1px solid var(--neon-purple);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--neon-purple);
+            transition: all 0.3s;
         }
 
-        /* ==================== 项目网格 - 倾斜撕裂 ==================== */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 50px;
+        .tag:hover {
+            background: var(--neon-purple);
+            color: var(--dark-bg);
+            transform: scale(1.1);
         }
 
-        .project-item {
-            background: var(--deep-black);
-            border: 2px solid var(--cyber-cyan);
-            padding: 25px;
-            position: relative;
-            clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
-            transition: all 0.4s;
-        }
-
-        .project-item:hover {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            background: var(--holographic);
-            color: var(--deep-black);
-        }
-
-        .project-item:hover h3,
-        .project-item:hover p {
-            color: var(--deep-black);
-        }
-
-        .project-item h3 {
-            color: var(--neon-pink);
-            margin-bottom: 10px;
-        }
-
-        .project-item p {
-            color: #aaa;
-            line-height: 1.5;
-        }
-
-        /* ==================== 联系区域 - 霓虹表单 ==================== */
-        #contact {
+        /* 联系我 */
+        .contact-section {
             text-align: center;
         }
 
-        .neon-form {
-            max-width: 600px;
-            margin: 50px auto;
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .contact-item {
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--neon-cyan);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            align-items: center;
         }
 
-        .neon-input,
-        .neon-textarea {
-            background: transparent;
-            border: 2px solid var(--neon-pink);
-            padding: 15px 20px;
-            color: var(--acid-green);
-            font-family: inherit;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .neon-input:focus,
-        .neon-textarea:focus {
-            outline: none;
-            border-color: var(--acid-green);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
-            transform: translateX(10px);
-        }
-
-        .neon-textarea {
-            min-height: 150px;
-            resize: vertical;
-        }
-
-        .neon-button {
-            background: var(--holographic);
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: var(--deep-black);
-            cursor: pointer;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
-            transition: all 0.3s;
-        }
-
-        .neon-button:hover {
-            filter: brightness(1.3);
-            transform: scale(1.05);
-        }
-
-        /* ==================== 装饰元素 ==================== */
-        .floating-elements {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
+        .contact-item::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            transition: all 0.5s;
+            transform: translate(-50%, -50%);
             z-index: -1;
         }
 
-        .floating-code {
+        .contact-item:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .contact-item:hover {
+            color: var(--dark-bg);
+            transform: scale(1.05);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .contact-icon {
+            font-size: 42px;
+            margin-bottom: 20px;
+            color: var(--neon-cyan);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contact-item:hover .contact-icon {
+            color: var(--dark-bg);
+            transform: scale(1.2);
+        }
+
+        .contact-label {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .contact-value {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* 页脚 */
+        footer {
+            padding: 50px 0;
+            text-align: center;
+            border-top: 1px solid rgba(139, 0, 255, 0.3);
+            color: #666;
+            position: relative;
+        }
+
+        .footer-glow {
             position: absolute;
-            color: var(--beast-red);
-            font-size: 1rem;
-            opacity: 0.3;
-            animation: float 20s linear infinite;
+            top: -1px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+            animation: glowPulse 2s infinite;
         }
 
-        @keyframes float {
-            0% { transform: translateY(100vh) rotate(0deg); }
-            100% { transform: translateY(-100px) rotate(360deg); }
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
 
-        /* ==================== 滚动动画 ==================== */
-        .reveal {
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ==================== 响应式设计 ==================== */
+        /* 响应式设计 */
         @media (max-width: 768px) {
-            .nav-torn {
-                padding: 15px 20px;
-            }
-            
-            .nav-torn ul {
-                flex-wrap: wrap;
-                gap: 20px;
-            }
-            
-            .glitch-name {
-                font-size: 3rem;
-            }
-            
-            .metal-avatar {
-                width: 200px; height: 200px;
-            }
-            
-            main {
-                padding: 0 20px 50px;
-            }
+            .name { font-size: 60px; }
+            .title { font-size: 24px; }
+            .about-content { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
         }
 
-        /* 减少运动偏好 */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+        /* 滚动提示 */
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-hint i {
+            font-size: 30px;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        /* 小红书图标样式 */
+        .fa-leaf {
+            color: var(--neon-pink);
+        }
+
+        .contact-item:hover .fa-leaf {
+            color: var(--dark-bg);
+        }
+
+        /* Google Scholar图标增强 */
+        .fa-graduation-cap {
+            font-size: 44px;
         }
     </style>
 </head>
 <body>
-    <!-- 加载动画 -->
-    <div class="loader" id="loader">
-        <svg class="splash-svg" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="0" fill="var(--beast-red)">
-                <animate attributeName="r" from="0" to="100" dur="0.8s" fill="freeze" />
-            </circle>
-        </svg>
-        <h1 class="acid-text">WAKING UP...</h1>
-    </div>
+    <!-- 自定义光标 -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
 
-    <!-- SVG滤镜 -->
-    <svg class="svg-filters">
-        <defs>
-            <filter id="liquid-metal">
-                <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="turbulence" />
-                <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="8" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-        </defs>
-    </svg>
+    <!-- 扫描线效果 -->
+    <div class="scanlines"></div>
 
     <!-- 导航栏 -->
-    <nav class="nav-torn">
-        <ul>
-            <li><a href="#about"><i class="iconfont icon-user icon-acid"></i> 关于</a></li>
-            <li><a href="#skills"><i class="iconfont icon-skill icon-acid"></i> 技能</a></li>
-            <li><a href="#papers"><i class="iconfont icon-paper icon-acid"></i> 论文</a></li>
-            <li><a href="#projects"><i class="iconfont icon-project icon-acid"></i> 项目</a></li>
-            <li><a href="#contact"><i class="iconfont icon-contact icon-acid"></i> 联系</a></li>
-        </ul>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">GARY @USTC</div>
+            <ul class="nav-links">
+                <li><a href="#home">HOME</a></li>
+                <li><a href="#about">ABOUT</a></li>
+                <li><a href="#research">RESEARCH</a></li>
+                <li><a href="#publications">PAPERS</a></li>
+                <li><a href="#contact">CONTACT</a></li>
+            </ul>
+        </div>
     </nav>
 
-    <!-- 主内容 -->
-    <main>
-        <!-- 关于区域 -->
-        <section id="about" class="section">
-            <div class="metal-avatar reveal">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=CodeRebel" alt="Avatar">
+    <!-- Hero 区域 -->
+    <section id="home" class="hero">
+        <!-- 扩散模型背景 -->
+        <div class="diffusion-bg" id="diffusionBg"></div>
+        
+        <!-- 粒子效果 -->
+        <div class="particles" id="particles"></div>
+        
+        <!-- 多模态图标矩阵 -->
+        <div class="multimodal-matrix" id="matrix"></div>
+        
+        <div class="hero-content">
+            <h1 class="name">GARY</h1>
+            <h2 class="title">Diffusion & MLLMs</h2>
+            <p class="subtitle">探索扩散的无限可能 · 构建多模态的未来</p>
+            
+            <div class="cta-buttons">
+                <a href="#publications" class="btn btn-primary">My Papers</a>
+                <a href="#contact" class="btn btn-secondary">Contact Me</a>
             </div>
-            <h1 class="glitch-name reveal" data-text="Dr. Gary" data-splitting>Dr. Gary</h1>
-            <p class="beast-handwrite reveal">// USTC 无限进步</p>
-            <p class="beast-handwrite reveal" style="margin-top: 10px;">// 10101010101010101010</p>
-        </section>
+        </div>
+        
+        <div class="scroll-hint">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
 
-        <!-- 技能区域 -->
-        <section id="skills" class="section">
-            <h2 class="section-title glitch-name reveal" data-text="SKILLS" style="font-size: 3rem;">SKILLS</h2>
-            <div class="skills-grid">
-                <div class="skill-item reveal">
-                    <h3>Python</h3>
-                    <div class="skill-bar" data-level="95">
-                        <div class="skill-progress" style="width: 0;">
-                            <span class="skill-level">95%</span>
-                        </div>
+    <!-- 关于我 -->
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>我是<span class="highlight">Gary</span>，一名专注于<span class="highlight">扩散模型</span>和<span class="highlight">多模态大模型</span>研究的PhD。</p>
+                    <p>我的研究致力于探索生成式AI的边界，将<span class="highlight">噪声转化为艺术</span>，让<span class="highlight">文本、图像、视频、3D</span>在不同模态间自由流转。</p>
+                    <p>在这个数字化时代，我相信AI不仅是工具，更是<span class="highlight">创造力的延伸</span>。通过不断优化扩散过程，我正在构建能够理解和创造<span class="highlight">多模态内容</span>的智能系统。</p>
+                    <p>当我不在训练模型时，我喜欢思考<span class="highlight">意识的本质</span>和<span class="highlight">智能的涌现</span>——也许下一个突破就藏在梦境深处。</p>
+                </div>
+                <div class="about-visual">
+                    <!-- 脑神经网络可视化 -->
+                    <div class="brain-network" id="brainNetwork">
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <svg width="300" height="300" style="position: absolute; top: 0; left: 0;">
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ff006e;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#00f5ff;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
                     </div>
                 </div>
-                <div class="skill-item reveal">
-                    <h3>Diffusion</h3>
-                    <div class="skill-bar" data-level="90">
-                        <div class="skill-progress" style="width: 0;">
-                            <span class="skill-level">90%</span>
-                        </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 研究领域 -->
+    <section id="research">
+        <div class="container">
+            <h2 class="section-title">研究领域</h2>
+            <div class="research-grid">
+                <div class="research-card">
+                    <div class="research-icon">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <h3 class="research-title">扩散模型</h3>
+                    <p class="research-description">
+                        深入研究扩散过程的数学原理，探索更高效的采样算法和噪声调度策略。致力于将扩散时间从无限缩短到毫秒级。
+                    </p>
+                </div>
+                <div class="research-card">
+                    <div class="research-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="research-title">多模态融合</h3>
+                    <p class="research-description">
+                        构建统一的表示空间，让模态在潜空间中自由转换。实现真正的跨模态理解和生成。
+                    </p>
+                </div>
+                <div class="research-card">
+                    <div class="research-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h3 class="research-title">高效推理</h3>
+                    <p class="research-description">
+                        通过模型压缩、量化蒸馏等技术，让大模型在边缘设备上奔跑。让AI无处不在，无所不能。
+                    </p>
+                </div>
+                <div class="research-card">
+                    <div class="research-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3 class="research-title">AI艺术</h3>
+                    <p class="research-description">
+                        将算法视为画笔，噪声视为颜料。探索机器创造力与人类审美的共鸣点，创造前所未有的艺术形式。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 论文发表 -->
+    <section id="publications">
+        <div class="container">
+            <h2 class="section-title">论文发表</h2>
+            <div class="papers-container">
+                <div class="paper-item">
+                    <h3 class="paper-title">Beyond Randomness: Understand the Order of the Noise in Diffusion</h3>
+                    <div class="paper-meta">
+                        <i class="fas fa-calendar"></i> 2025.11 | 
+                        <i class="fas fa-users"></i> Gary, et al. | 
+                        <i class="fas fa-file"></i> Under Review
+                    </div>
+                    <p class="paper-abstract">
+                        In text-driven content generation (T2C) diffusion model, semantic of generated content is mostly attributed to the process of text embedding and attention mechanism interaction. The initial noise of the generation process is typically characterized as a random element that contributes to the diversity of the generated content. Contrary to this view, this paper reveals that beneath the random surface of noise lies strong analyzable patterns. Specifically, this paper first conducts a comprehensive analysis of the impact of random noise on the model's generation. We found that noise not only contains rich semantic information, but also allows for the erasure of unwanted semantics from it in an extremely simple way based on information theory, and using the equivalence between the generation process of diffusion model and semantic injection to inject semantics into the cleaned noise. Then, we mathematically decipher these observations and propose a simple but efficient training-free and universal two-step "Semantic Erasure-Injection" process to modulate the initial noise in T2C diffusion model. Experimental results demonstrate that our method is consistently effective across various T2C models based on both DiT and UNet architectures and presents a novel perspective for optimizing the generation of diffusion model, providing a universal tool for consistent generation.
+                    </p>
+                    <div class="paper-tags">
+                        <span class="tag">扩散模型</span>
+                        <span class="tag">噪声优化</span>
+                        <span class="tag">Training-free</span>
                     </div>
                 </div>
-                <div class="skill-item reveal">
-                    <h3>MLLMs</h3>
-                    <div class="skill-bar" data-level="88">
-                        <div class="skill-progress" style="width: 0;">
-                            <span class="skill-level">88%</span>
-                        </div>
+                
+                <div class="paper-item">
+                    <h3 class="paper-title">Break Stylistic Sophon: Are We Really Meant to Confine the Imagination in Style Transfer?</h3>
+                    <div class="paper-meta">
+                        <i class="fas fa-calendar"></i> 2025.05| 
+                        <i class="fas fa-users"></i> Gary, et al. | 
+                        <i class="fas fa-file"></i> Under Review
+                    </div>
+                    <p class="paper-abstract">
+                        In the realm of image style transfer, existing algorithms relying on single reference style images encounter formidable challenges, such as severe semantic drift, overfitting, color limitations, and a lack of a unified framework. These issues impede the generation of high quality, diverse, and semantically accurate images. In this study, we introduce StyleWallfacer, an innovative unified training and inference framework, which not only addresses various issues encountered in the style transfer process of traditional methods but also unifies the framework for different tasks. This framework is designed to advance the development of this field by enabling high-quality style transfer and text driven stylization. First, we propose a semantic-based style injection method that uses BLIP to generate text descriptions strictly aligned with the semantics of the style image in CLIP space. By leveraging a large language model to remove style-related descriptions from these descriptions, we create a semantic gap. This gap is then used to fine-tune the model, enabling efficient and drift-free injection of style knowledge. Second, we propose a data augmentation strategy based on human feedback, incorporating high-quality samples generated early in the fine-tuning process into the training set to facilitate progressive learning and significantly reduce its overfitting. Finally, we design a training-free triple diffusion process using the fine-tuned model, which manipulates the features of self-attention layers in a manner similar to the cross-attention mechanism. Specifically, in the generation process, the key and value of the content-related process are replaced with those of the style-related process to inject style while maintaining text control over the model. We also introduce query preservation to mitigate disruptions to the original content. Under such a design, we have achieved high-quality image-driven style transfer and text-driven stylization, delivering high-quality style transfer results while preserving the original image content. Moreover, we achieve image color editing during the style transfer process for the first time, further pushing the boundaries of controllable image generation and editing technologies and breaking the limitations imposed by reference images on style transfer. Our experimental results demonstrate that our proposed method outperforms state-of-the-art methods.
+                    </p>
+                    <div class="paper-tags">
+                        <span class="tag">AI艺术</span>
+                        <span class="tag">风格迁移</span>
+                        <span class="tag">扩散模型</span>
                     </div>
                 </div>
-                <div class="skill-item reveal">
-                    <h3>Machine Learning</h3>
-                    <div class="skill-bar" data-level="92">
-                        <div class="skill-progress" style="width: 0;">
-                            <span class="skill-level">92%</span>
+                
+                <div class="paper-item">
+                    <h3 class="paper-title">SHSRD: Efficient Conditional Diffusion Model for Single Hyperspectral Image Superresolution</h3>
+                    <div class="paper-meta">
+                        <i class="fas fa-calendar"></i> 2025.03 | 
+                        <i class="fas fa-users"></i> Gary, et al. | 
+                        <i class="fas fa-file"></i> JSTARS 2025
+                    </div>
+                    <p class="paper-abstract">
+                        The emergence of deep neural networks has spurred progress in single hyperspectral image (HSI) superresolution. However, mainstream models prioritize network architecture and optimization, overlooking the limitations of HSI datasets’ small scale and potential data imbalance. Direct training models with such datasets can lead to issues, such as overfitting. To better solve the above-mentioned problems from the perspective of dataset, we propose SHSRD, an advanced superresolution framework specifically designed for HSIs based on diffusion model. It incorporates a spectral information injection module, which selectively introduces diverse spectral information into the model in a conditional manner, thereby enabling efficient spectral information perception. Furthermore, a two-stage training strategy is meticulously devised. Initially, the model undergoes pretraining on a large-scale natural image dataset. Subsequently, leveraging transfer learning techniques, the knowledge acquired from the natural image dataset is seamlessly transferred to the single HSI superresolution task. This strategic approach culminates in the realization of high-quality superresolution for single HSIs, effectively addressing the challenges associated with limited training data in hyperspectral imaging. It also demonstrates significant generalization, with only one pretraining session on a natural image dataset required for scale-specific tasks, allowing for rapid transfer to any small HSI dataset. Extensive experiments on four public datasets demonstrate that SHSRD outperforms state-of-the-art methods.
+                    </p>
+                    <div class="paper-tags">
+                        <span class="tag">扩散模型</span>
+                        <span class="tag">高光谱图像</span>
+                        <span class="tag">底层视觉</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我 -->
+    <section id="contact">
+        <div class="container">
+            <h2 class="section-title">建立连接</h2>
+            <div class="contact-section">
+                <p style="font-size: 20px; color: #ccc; margin-bottom: 40px;">
+                    让我们一起探索AI的无限可能，在噪声中发现秩序，在模态间寻找共鸣。
+                </p>
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
                         </div>
+                        <div class="contact-label">邮箱</div>
+                        <div class="contact-value">Gary_144@mail.ustc.edu.cn</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="contact-label">小红书</div>
+                        <div class="contact-value">@gary爱登山</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <div class="contact-label">GitHub</div>
+                        <div class="contact-value">https://songyan888.github.io/</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="contact-label">Google Scholar</div>
+                        <div class="contact-value">https://scholar.google.com/citations?hl=en&view_op=list_works&gmla=AH8HC4wqFErU2rFoEGuxJmJbjdzYmuspChI4l0UFBpFuIZnh65Kr9BgvPZ5oNnkAUVRDao0hVf2Z_XSwC800SQ_jIjLBvqwWK98_yjLzJK4&user=eCL463UAAAAJ</div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 论文区域 -->
-        <section id="papers" class="section">
-            <h2 class="section-title glitch-name reveal" data-text="PUBLICATIONS" style="font-size: 3rem;">PUBLICATIONS</h2>
-            <div class="papers-grid">
-                <article class="paper-card reveal">
-                    <h3>Beyond Randomness</h3>
-                    <p class="abstract">In text-driven content generation (T2C) diffusion model, semantic of generated content is mostly attributed to the process of text embedding and attention mechanism interaction. The initial noise of the generation process is typically characterized as a random element that contributes to the diversity of the generated content. Contrary to this view, this paper reveals that beneath the random surface of noise lies strong analyzable patterns. Specifically, this paper first conducts a comprehensive analysis of the impact of random noise on the model's generation. We found that noise not only contains rich semantic information, but also allows for the erasure of unwanted semantics from it in an extremely simple way based on information theory, and using the equivalence between the generation process of diffusion model and semantic injection to inject semantics into the cleaned noise. Then, we mathematically decipher these observations and propose a simple but efficient training-free and universal two-step "Semantic Erasure-Injection" process to modulate the initial noise in T2C diffusion model. Experimental results demonstrate that our method is consistently effective across various T2C models based on both DiT and UNet architectures and presents a novel perspective for optimizing the generation of diffusion model, providing a universal tool for consistent generation.</p>
-                    <div class="holographic-badge">CVPR 2026 Under Review</div>
-                </article>
-            </div>
-        </section>
-
-        <!-- 项目区域 -->
-        <section id="projects" class="section">
-            <h2 class="section-title glitch-name reveal" data-text="PROJECTS" style="font-size: 3rem;">PROJECTS</h2>
-            <div class="projects-grid">
-                <div class="project-item reveal">
-                    <h3><i class="iconfont icon-github"></i> BestRandom</h3>
-                    <p>探索噪声中的美感</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 联系区域 -->
-        <section id="contact" class="section">
-            <h2 class="section-title glitch-name reveal" data-text="CONTACT" style="font-size: 3rem;">CONTACT</h2>
-            <form class="neon-form reveal">
-                <input type="text" class="neon-input" placeholder="NAME" required>
-                <input type="email" class="neon-input" placeholder="EMAIL" required>
-                <textarea class="neon-textarea" placeholder="MESSAGE (编码你的思想...)"></textarea>
-                <button type="submit" class="neon-button">SEND ENCRYPTED SIGNAL</button>
-            </form>
-            <div class="reveal" style="margin-top: 50px;">
-                <a href="#" style="color: var(--neon-pink); font-size: 2rem; margin: 0 20px;">
-                    <i class="iconfont icon-twitter icon-acid"></i>
-                </a>
-                <a href="#" style="color: var(--acid-green); font-size: 2rem; margin: 0 20px;">
-                    <i class="iconfont icon-linkedin icon-acid"></i>
-                </a>
-                <a href="#" style="color: var(--cyber-cyan); font-size: 2rem; margin: 0 20px;">
-                    <i class="iconfont icon-github icon-acid"></i>
-                </a>
-            </div>
-        </section>
-    </main>
-
-    <!-- 背景装饰代码片段 -->
-    <div class="floating-elements">
-        <div class="floating-code" style="left: 10%; animation-delay: 0s;">const chaos = order.break();</div>
-        <div class="floating-code" style="left: 30%; animation-delay: 5s;">function rebel() { return true; }</div>
-        <div class="floating-code" style="left: 50%; animation-delay: 10s;">if (soul) { code.art(); }</div>
-        <div class="floating-code" style="left: 70%; animation-delay: 15s;">while(true) { create(); }</div>
-        <div class="floating-code" style="left: 90%; animation-delay: 20s;">class Beast extends Human {}</div>
-    </div>
+    <!-- 页脚 -->
+    <footer>
+        <div class="footer-glow"></div>
+        <p>&copy; 2025 Gary. All Rights Reserved.</p>
+    </footer>
 
     <script>
-        // ==================== 初始化与动画控制 ====================
+        // 自定义光标
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
 
-        // 移除加载动画
-        window.addEventListener('load', () => {
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 10 + 'px';
+            cursor.style.top = e.clientY - 10 + 'px';
+            
             setTimeout(() => {
-                gsap.to('#loader', {
-                    opacity: 0,
-                    duration: 0.8,
-                    onComplete: () => {
-                        document.getElementById('loader').style.display = 'none';
-                    }
-                });
-            }, 1000);
+                cursorFollower.style.left = e.clientX - 20 + 'px';
+                cursorFollower.style.top = e.clientY - 20 + 'px';
+            }, 100);
         });
 
-        // 文字分割动画
-        Splitting();
+        // 创建粒子
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            document.getElementById('particles').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 10000);
+        }
 
-        // 技能条动画
-        const observerOptions = {
-            threshold: 0.5,
-            rootMargin: '0px 0px -100px 0px'
-        };
+        setInterval(createParticle, 200);
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
+        // 扩散动画
+        function createDiffusion() {
+            const circle = document.createElement('div');
+            circle.className = 'diffusion-circle';
+            circle.style.width = '50px';
+            circle.style.height = '50px';
+            circle.style.left = Math.random() * 100 + '%';
+            circle.style.top = Math.random() * 100 + '%';
+            circle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+            document.getElementById('diffusionBg').appendChild(circle);
+            
+            setTimeout(() => {
+                circle.remove();
+            }, 8000);
+        }
+
+        setInterval(createDiffusion, 2000);
+
+        // 多模态矩阵
+        const matrix = document.getElementById('matrix');
+        const icons = ['📝', '🖼️', '🎵', '🎬', '🗣️', '👁️', '🧠', '💭'];
+        
+        for(let i = 0; i < 100; i++) {
+            const icon = document.createElement('div');
+            icon.className = 'matrix-icon';
+            icon.textContent = icons[Math.floor(Math.random() * icons.length)];
+            icon.style.animationDelay = Math.random() * 4 + 's';
+            matrix.appendChild(icon);
+        }
+
+        // 神经网络连接
+        function createConnection() {
+            const brainNetwork = document.getElementById('brainNetwork');
+            const neurons = brainNetwork.querySelectorAll('.neuron');
+            const svg = brainNetwork.querySelector('svg');
+            
+            neurons.forEach((neuron, i) => {
+                if(i < neurons.length - 1) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    const rect = brainNetwork.getBoundingClientRect();
+                    const neuron1Rect = neuron.getBoundingClientRect();
+                    const neuron2Rect = neurons[i + 1].getBoundingClientRect();
                     
-                    // 技能条增长动画
-                    if (entry.target.classList.contains('skill-item')) {
-                        const bar = entry.target.querySelector('.skill-bar');
-                        const progress = entry.target.querySelector('.skill-progress');
-                        const level = bar.dataset.level;
-                        
-                        gsap.to(progress, {
-                            width: level + '%',
-                            duration: 2,
-                            ease: 'power2.out'
-                        });
-                        
-                        // 溅射动画
-                        gsap.from(progress.querySelector('::before'), {
-                            x: -20,
-                            scale: 0,
-                            duration: 0.5,
-                            delay: 0.5
-                        });
-                    }
+                    line.setAttribute('x1', neuron1Rect.left - rect.left + 10);
+                    line.setAttribute('y1', neuron1Rect.top - rect.top + 10);
+                    line.setAttribute('x2', neuron2Rect.left - rect.left + 10);
+                    line.setAttribute('y2', neuron2Rect.top - rect.top + 10);
+                    line.setAttribute('stroke', 'url(#gradient)');
+                    line.setAttribute('stroke-width', '2');
+                    line.setAttribute('opacity', '0.5');
+                    line.setAttribute('class', 'connection');
+                    
+                    svg.appendChild(line);
                 }
             });
-        }, observerOptions);
+        }
 
-        // 观察所有reveal元素
-        document.querySelectorAll('.reveal').forEach(el => {
-            observer.observe(el);
-        });
+        setTimeout(createConnection, 1000);
 
-        // 鼠标跟随视差效果
-        document.addEventListener('mousemove', (e) => {
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            
-            document.documentElement.style.setProperty('--mouse-x', x);
-            document.documentElement.style.setProperty('--mouse-y', y);
-            
-            // 浮动元素视差
-            document.querySelectorAll('.floating-code').forEach((code, i) => {
-                const speed = (i + 1) * 0.5;
-                gsap.to(code, {
-                    x: (x - 0.5) * speed * 20,
-                    y: (y - 0.5) * speed * 20,
-                    duration: 0.5,
-                    ease: 'power2.out'
-                });
-            });
-        });
-
-        // 导航平滑滚动
-        document.querySelectorAll('.nav-torn a').forEach(link => {
-            link.addEventListener('click', (e) => {
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                const target = document.querySelector(link.getAttribute('href'));
-                if (target) {
-                    gsap.to(window, {
-                        scrollTo: target,
-                        duration: 1.5,
-                        ease: 'power2.inOut'
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
                     });
                 }
             });
         });
 
-        // 表单提交效果
-        document.querySelector('.neon-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const button = e.target.querySelector('.neon-button');
-            const originalText = button.textContent;
+        // 滚动视差效果
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('.multimodal-matrix');
+            parallax.style.transform = `translateY(${scrolled * 0.5}px)`;
             
-            button.textContent = 'SIGNAL ENCRYPTED!';
-            button.style.background = 'var(--acid-green)';
-            
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.style.background = 'var(--holographic)';
-                e.target.reset();
-            }, 2000);
+            // 导航栏效果
+            const nav = document.querySelector('nav');
+            if(scrolled > 100) {
+                nav.style.background = 'rgba(10, 10, 10, 0.95)';
+                nav.style.boxShadow = '0 5px 20px rgba(0, 245, 255, 0.5)';
+            } else {
+                nav.style.background = 'rgba(10, 10, 10, 0.9)';
+                nav.style.boxShadow = '0 0 10px #00f5ff, 0 0 20px #00f5ff, 0 0 30px #00f5ff';
+            }
         });
 
-        // 随机故障效果
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            document.body.style.opacity = '1';
+            
+            // 添加加载完成后的额外动画
+            setTimeout(() => {
+                document.querySelector('.name').style.animation = 'gradient 3s ease infinite';
+            }, 3000);
+        });
+
+        // 鼠标悬停效果
+        document.querySelectorAll('.research-card, .paper-item, .contact-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+                cursor.style.borderColor = 'var(--neon-pink)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+                cursor.style.borderColor = 'var(--neon-cyan)';
+            });
+        });
+
+        // 动态更新多模态矩阵
         setInterval(() => {
-            document.querySelectorAll('.glitch-name').forEach(name => {
-                if (Math.random() > 0.7) {
-                    name.style.animation = 'none';
-                    setTimeout(() => {
-                        name.style.animation = '';
-                    }, 100);
+            const matrixIcons = document.querySelectorAll('.matrix-icon');
+            matrixIcons.forEach(icon => {
+                if(Math.random() > 0.9) {
+                    icon.textContent = icons[Math.floor(Math.random() * icons.length)];
+                    icon.style.color = ['var(--neon-cyan)', 'var(--neon-pink)', 'var(--neon-purple)'][Math.floor(Math.random() * 3)];
                 }
             });
-        }, 3000);
+        }, 1000);
     </script>
 </body>
 </html>
