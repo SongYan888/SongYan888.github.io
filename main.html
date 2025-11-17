@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Code Rebel - 数字野兽实验室</title>
+    
+    <!-- 核心库引入 -->
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js"></script>
+    
+    <!-- Iconfont图标库 -->
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_2506819_1tyq9zyxuss.css">
+    
+    <style>
+        /* ==================== 核心变量 - 危险美学配色 ==================== */
+        :root {
+            --neon-pink: #FF006E;
+            --acid-green: #00FF41;
+            --cyber-cyan: #00F5FF;
+            --beast-red: #FF3131;
+            --deep-black: #0A0A0A;
+            --holographic: linear-gradient(45deg, #FF006E, #00F5FF, #00FF41);
+            --mouse-x: 0.5;
+            --mouse-y: 0.5;
+        }
+
+        /* ==================== 基础重置 ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            background: var(--deep-black);
+            color: var(--cyber-cyan);
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* 新野兽派背景纹理 - 喷溅网点 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, var(--beast-red) 1px, transparent 1px),
+                radial-gradient(circle at 80% 80%, var(--acid-green) 1px, transparent 1px);
+            background-size: 100px 100px;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ==================== 加载动画 - 油漆飞溅 ==================== */
+        .loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--deep-black);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .splash-svg {
+            position: absolute;
+            width: 100%; height: 100%;
+        }
+
+        .acid-text {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            background: var(--holographic);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: hue-rotate 2s linear infinite;
+        }
+
+        @keyframes hue-rotate {
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        /* ==================== 导航栏 - 撕裂边缘 ==================== */
+        .nav-torn {
+            position: fixed;
+            top: 0; width: 100%;
+            background: var(--deep-black);
+            border-bottom: 3px solid var(--beast-red);
+            padding: 20px 50px;
+            z-index: 1000;
+            clip-path: polygon(
+                0 0, 100% 0, 100% 85%, 98% 90%, 96% 85%, 94% 92%,
+                92% 85%, 90% 90%, 88% 85%, 86% 92%, 84% 85%, 82% 90%,
+                80% 85%, 78% 92%, 76% 85%, 74% 90%, 72% 85%, 70% 92%,
+                68% 85%, 66% 90%, 64% 85%, 62% 92%, 60% 85%, 58% 90%,
+                56% 85%, 54% 92%, 52% 85%, 50% 90%, 48% 85%, 46% 92%,
+                44% 85%, 42% 90%, 40% 85%, 38% 92%, 36% 85%, 34% 90%,
+                32% 85%, 30% 92%, 28% 85%, 26% 90%, 24% 85%, 22% 92%,
+                20% 85%, 18% 90%, 16% 85%, 14% 92%, 12% 85%, 10% 90%,
+                8% 85%, 6% 92%, 4% 85%, 2% 90%, 0 85%
+            );
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-torn:hover {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            border-bottom-color: var(--acid-green);
+        }
+
+        .nav-torn ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .nav-torn a {
+            color: var(--neon-pink);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-torn a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 0;
+            width: 0; height: 2px;
+            background: var(--acid-green);
+            transition: width 0.3s;
+        }
+
+        .nav-torn a:hover {
+            color: var(--acid-green);
+            transform: translateY(-2px);
+        }
+
+        .nav-torn a:hover::after {
+            width: 100%;
+        }
+
+        /* 图标酸性效果 */
+        .icon-acid {
+            font-size: 1.5rem;
+            background: var(--holographic);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: hue-rotate 3s linear infinite;
+        }
+
+        /* ==================== 主内容区 ==================== */
+        main {
+            margin-top: 120px;
+            padding: 0 50px 50px;
+        }
+
+        .section {
+            min-height: 100vh;
+            padding: 80px 0;
+            border-bottom: 1px dashed var(--beast-red);
+            position: relative;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(
+                circle at calc(var(--mouse-x) * 100%) calc(var(--mouse-y) * 100%),
+                var(--cyber-cyan) 0%, transparent 30%
+            );
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        /* ==================== 个人简介 - 液态金属头像 ==================== */
+        #about {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metal-avatar {
+            width: 300px; height: 300px;
+            position: relative;
+            margin-bottom: 40px;
+            filter: url(#liquid-metal);
+        }
+
+        .metal-avatar img {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--neon-pink);
+            box-shadow: 0 0 50px var(--cyber-cyan);
+        }
+
+        /* SVG液态金属滤镜 */
+        .svg-filters {
+            position: absolute;
+            width: 0; height: 0;
+        }
+
+        .glitch-name {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--acid-green);
+            position: relative;
+            margin-bottom: 20px;
+            letter-spacing: 0.1em;
+        }
+
+        .glitch-name::before,
+        .glitch-name::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        .glitch-name::before {
+            animation: glitch-1 0.5s infinite;
+            color: var(--neon-pink);
+            z-index: -1;
+        }
+
+        .glitch-name::after {
+            animation: glitch-2 0.5s infinite;
+            color: var(--cyber-cyan);
+            z-index: -2;
+        }
+
+        @keyframes glitch-1 {
+            0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+            20% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 2px); }
+            40% { clip-path: inset(50% 0 20% 0); transform: translate(2px, -2px); }
+            60% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 0); }
+            80% { clip-path: inset(80% 0 10% 0); transform: translate(2px, 0); }
+        }
+
+        @keyframes glitch-2 {
+            0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+            20% { clip-path: inset(60% 0 20% 0); transform: translate(2px, 0); }
+            40% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 0); }
+            60% { clip-path: inset(80% 0 10% 0); transform: translate(2px, -2px); }
+            80% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 2px); }
+        }
+
+        .beast-handwrite {
+            font-size: 1.2rem;
+            color: var(--beast-red);
+            font-style: italic;
+            opacity: 0.8;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .beast-handwrite::before {
+            content: '//';
+            position: absolute;
+            left: 0;
+            color: var(--acid-green);
+        }
+
+        /* ==================== 技能展示 - 冲突进度条 ==================== */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .skill-item h3 {
+            color: var(--neon-pink);
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .skill-bar {
+            height: 40px;
+            background: var(--deep-black);
+            border: 3px solid var(--beast-red);
+            position: relative;
+            overflow: visible;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+        }
+
+        .skill-progress {
+            height: 100%;
+            background: var(--acid-green);
+            position: relative;
+            transition: width 2s ease-out;
+        }
+
+        .skill-progress::before {
+            content: '';
+            position: absolute;
+            left: -10px; top: -5px;
+            width: 20px; height: 20px;
+            background: var(--cyber-cyan);
+            border-radius: 50%;
+            animation: splash 0.3s ease-out infinite alternate;
+            box-shadow: 0 0 10px var(--cyber-cyan);
+        }
+
+        @keyframes splash {
+            100% { transform: scale(1.5) translateX(5px); }
+        }
+
+        .skill-level {
+            position: absolute;
+            right: 10px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--deep-black);
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        /* ==================== 论文卡片 - 撕裂拼贴 ==================== */
+        .papers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .paper-card {
+            background: var(--deep-black);
+            border: 2px solid var(--neon-pink);
+            padding: 30px;
+            position: relative;
+            transition: all 0.4s;
+            clip-path: polygon(0 0, 100% 0, 95% 90%, 90% 95%, 85% 85%, 80% 95%, 75% 85%, 70% 95%, 0 100%);
+        }
+
+        .paper-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--acid-green);
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.3);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .paper-card h3 {
+            color: var(--cyber-cyan);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .abstract {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .holographic-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--holographic);
+            color: var(--deep-black);
+            font-weight: 900;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            animation: badge-glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes badge-glow {
+            100% { filter: brightness(1.5) saturate(1.5); }
+        }
+
+        /* ==================== 项目网格 - 倾斜撕裂 ==================== */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .project-item {
+            background: var(--deep-black);
+            border: 2px solid var(--cyber-cyan);
+            padding: 25px;
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+            transition: all 0.4s;
+        }
+
+        .project-item:hover {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            background: var(--holographic);
+            color: var(--deep-black);
+        }
+
+        .project-item:hover h3,
+        .project-item:hover p {
+            color: var(--deep-black);
+        }
+
+        .project-item h3 {
+            color: var(--neon-pink);
+            margin-bottom: 10px;
+        }
+
+        .project-item p {
+            color: #aaa;
+            line-height: 1.5;
+        }
+
+        /* ==================== 联系区域 - 霓虹表单 ==================== */
+        #contact {
+            text-align: center;
+        }
+
+        .neon-form {
+            max-width: 600px;
+            margin: 50px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .neon-input,
+        .neon-textarea {
+            background: transparent;
+            border: 2px solid var(--neon-pink);
+            padding: 15px 20px;
+            color: var(--acid-green);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .neon-input:focus,
+        .neon-textarea:focus {
+            outline: none;
+            border-color: var(--acid-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            transform: translateX(10px);
+        }
+
+        .neon-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .neon-button {
+            background: var(--holographic);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--deep-black);
+            cursor: pointer;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            transition: all 0.3s;
+        }
+
+        .neon-button:hover {
+            filter: brightness(1.3);
+            transform: scale(1.05);
+        }
+
+        /* ==================== 装饰元素 ==================== */
+        .floating-elements {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-code {
+            position: absolute;
+            color: var(--beast-red);
+            font-size: 1rem;
+            opacity: 0.3;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+
+        /* ==================== 滚动动画 ==================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ==================== 响应式设计 ==================== */
+        @media (max-width: 768px) {
+            .nav-torn {
+                padding: 15px 20px;
+            }
+            
+            .nav-torn ul {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            
+            .glitch-name {
+                font-size: 3rem;
+            }
+            
+            .metal-avatar {
+                width: 200px; height: 200px;
+            }
+            
+            main {
+                padding: 0 20px 50px;
+            }
+        }
+
+        /* 减少运动偏好 */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div class="loader" id="loader">
+        <svg class="splash-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="0" fill="var(--beast-red)">
+                <animate attributeName="r" from="0" to="100" dur="0.8s" fill="freeze" />
+            </circle>
+        </svg>
+        <h1 class="acid-text">WAKING UP...</h1>
+    </div>
+
+    <!-- SVG滤镜 -->
+    <svg class="svg-filters">
+        <defs>
+            <filter id="liquid-metal">
+                <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="turbulence" />
+                <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="8" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- 导航栏 -->
+    <nav class="nav-torn">
+        <ul>
+            <li><a href="#about"><i class="iconfont icon-user icon-acid"></i> 关于</a></li>
+            <li><a href="#skills"><i class="iconfont icon-skill icon-acid"></i> 技能</a></li>
+            <li><a href="#papers"><i class="iconfont icon-paper icon-acid"></i> 论文</a></li>
+            <li><a href="#projects"><i class="iconfont icon-project icon-acid"></i> 项目</a></li>
+            <li><a href="#contact"><i class="iconfont icon-contact icon-acid"></i> 联系</a></li>
+        </ul>
+    </nav>
+
+    <!-- 主内容 -->
+    <main>
+        <!-- 关于区域 -->
+        <section id="about" class="section">
+            <div class="metal-avatar reveal">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=CodeRebel" alt="Avatar">
+            </div>
+            <h1 class="glitch-name reveal" data-text="Dr. Code Rebel" data-splitting>Dr. Code Rebel</h1>
+            <p class="beast-handwrite reveal">// 算法诗人 & 数字涂鸦者</p>
+            <p class="beast-handwrite reveal" style="margin-top: 10px;">// 在0和1之间寻找人性的温度</p>
+        </section>
+
+        <!-- 技能区域 -->
+        <section id="skills" class="section">
+            <h2 class="section-title glitch-name reveal" data-text="SKILLS" style="font-size: 3rem;">SKILLS</h2>
+            <div class="skills-grid">
+                <div class="skill-item reveal">
+                    <h3>Python</h3>
+                    <div class="skill-bar" data-level="95">
+                        <div class="skill-progress" style="width: 0;">
+                            <span class="skill-level">95%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-item reveal">
+                    <h3>Machine Learning</h3>
+                    <div class="skill-bar" data-level="90">
+                        <div class="skill-progress" style="width: 0;">
+                            <span class="skill-level">90%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-item reveal">
+                    <h3>Cybersecurity</h3>
+                    <div class="skill-bar" data-level="88">
+                        <div class="skill-progress" style="width: 0;">
+                            <span class="skill-level">88%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-item reveal">
+                    <h3>Creative Coding</h3>
+                    <div class="skill-bar" data-level="92">
+                        <div class="skill-progress" style="width: 0;">
+                            <span class="skill-level">92%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 论文区域 -->
+        <section id="papers" class="section">
+            <h2 class="section-title glitch-name reveal" data-text="PUBLICATIONS" style="font-size: 3rem;">PUBLICATIONS</h2>
+            <div class="papers-grid">
+                <article class="paper-card reveal">
+                    <h3>Adversarial Robustness in Neural Architecture</h3>
+                    <p class="abstract">探索神经网络在对抗空间中的脆弱性与防御机制，提出基于梯度掩码的新型鲁棒性增强框架。实验表明在CIFAR-10数据集上攻击成功率降低37%。</p>
+                    <div class="holographic-badge">ICML 2024</div>
+                </article>
+                <article class="paper-card reveal">
+                    <h3>Quantum-Inspired Optimization Algorithms</h3>
+                    <p class="abstract">受量子退火启发，设计混合经典-量子优化算法，解决组合爆炸问题。在TSP问题求解中比传统模拟退火快4.2倍。</p>
+                    <div class="holographic-badge">Nature Computing 2023</div>
+                </article>
+                <article class="paper-card reveal">
+                    <h3>Generative Adversarial Networks for Code Obfuscation</h3>
+                    <p class="abstract">首次将GAN应用于代码混淆领域，生成语义等价但语法高度变异代码，有效对抗静态分析工具，混淆率达到91.3%。</p>
+                    <div class="holographic-badge">IEEE S&P 2023</div>
+                </article>
+            </div>
+        </section>
+
+        <!-- 项目区域 -->
+        <section id="projects" class="section">
+            <h2 class="section-title glitch-name reveal" data-text="PROJECTS" style="font-size: 3rem;">PROJECTS</h2>
+            <div class="projects-grid">
+                <div class="project-item reveal">
+                    <h3><i class="iconfont icon-github"></i> NeuralGraffiti</h3>
+                    <p>将神经网络可视化转化为街头涂鸦艺术，探索AI的可解释性与美学的交叉点。</p>
+                </div>
+                <div class="project-item reveal">
+                    <h3><i class="iconfont icon-gitlab"></i> CryptoBeast</h3>
+                    <p>新野兽派风格的加密通信协议，将密码学算法可视化成交互式艺术装置。</p>
+                </div>
+                <div class="project-item reveal">
+                    <h3><i class="iconfont icon-bug"></i> AcidDebugger</h3>
+                    <p>酸性赛博风格的代码调试器，让BUG追踪变成沉浸式视觉体验。</p>
+                </div>
+                <div class="project-item reveal">
+                    <h3><i class="iconfont icon-robot"></i> ConsciousnessSim</h3>
+                    <p>模拟意识涌现的数字实验，用代码探索哲学与计算机科学的边界。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 联系区域 -->
+        <section id="contact" class="section">
+            <h2 class="section-title glitch-name reveal" data-text="CONTACT" style="font-size: 3rem;">CONTACT</h2>
+            <form class="neon-form reveal">
+                <input type="text" class="neon-input" placeholder="NAME" required>
+                <input type="email" class="neon-input" placeholder="EMAIL" required>
+                <textarea class="neon-textarea" placeholder="MESSAGE (编码你的思想...)"></textarea>
+                <button type="submit" class="neon-button">SEND ENCRYPTED SIGNAL</button>
+            </form>
+            <div class="reveal" style="margin-top: 50px;">
+                <a href="#" style="color: var(--neon-pink); font-size: 2rem; margin: 0 20px;">
+                    <i class="iconfont icon-twitter icon-acid"></i>
+                </a>
+                <a href="#" style="color: var(--acid-green); font-size: 2rem; margin: 0 20px;">
+                    <i class="iconfont icon-linkedin icon-acid"></i>
+                </a>
+                <a href="#" style="color: var(--cyber-cyan); font-size: 2rem; margin: 0 20px;">
+                    <i class="iconfont icon-github icon-acid"></i>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- 背景装饰代码片段 -->
+    <div class="floating-elements">
+        <div class="floating-code" style="left: 10%; animation-delay: 0s;">const chaos = order.break();</div>
+        <div class="floating-code" style="left: 30%; animation-delay: 5s;">function rebel() { return true; }</div>
+        <div class="floating-code" style="left: 50%; animation-delay: 10s;">if (soul) { code.art(); }</div>
+        <div class="floating-code" style="left: 70%; animation-delay: 15s;">while(true) { create(); }</div>
+        <div class="floating-code" style="left: 90%; animation-delay: 20s;">class Beast extends Human {}</div>
+    </div>
+
+    <script>
+        // ==================== 初始化与动画控制 ====================
+
+        // 移除加载动画
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                gsap.to('#loader', {
+                    opacity: 0,
+                    duration: 0.8,
+                    onComplete: () => {
+                        document.getElementById('loader').style.display = 'none';
+                    }
+                });
+            }, 1000);
+        });
+
+        // 文字分割动画
+        Splitting();
+
+        // 技能条动画
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    
+                    // 技能条增长动画
+                    if (entry.target.classList.contains('skill-item')) {
+                        const bar = entry.target.querySelector('.skill-bar');
+                        const progress = entry.target.querySelector('.skill-progress');
+                        const level = bar.dataset.level;
+                        
+                        gsap.to(progress, {
+                            width: level + '%',
+                            duration: 2,
+                            ease: 'power2.out'
+                        });
+                        
+                        // 溅射动画
+                        gsap.from(progress.querySelector('::before'), {
+                            x: -20,
+                            scale: 0,
+                            duration: 0.5,
+                            delay: 0.5
+                        });
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // 观察所有reveal元素
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 鼠标跟随视差效果
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            document.documentElement.style.setProperty('--mouse-x', x);
+            document.documentElement.style.setProperty('--mouse-y', y);
+            
+            // 浮动元素视差
+            document.querySelectorAll('.floating-code').forEach((code, i) => {
+                const speed = (i + 1) * 0.5;
+                gsap.to(code, {
+                    x: (x - 0.5) * speed * 20,
+                    y: (y - 0.5) * speed * 20,
+                    duration: 0.5,
+                    ease: 'power2.out'
+                });
+            });
+        });
+
+        // 导航平滑滚动
+        document.querySelectorAll('.nav-torn a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    gsap.to(window, {
+                        scrollTo: target,
+                        duration: 1.5,
+                        ease: 'power2.inOut'
+                    });
+                }
+            });
+        });
+
+        // 表单提交效果
+        document.querySelector('.neon-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const button = e.target.querySelector('.neon-button');
+            const originalText = button.textContent;
+            
+            button.textContent = 'SIGNAL ENCRYPTED!';
+            button.style.background = 'var(--acid-green)';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = 'var(--holographic)';
+                e.target.reset();
+            }, 2000);
+        });
+
+        // 随机故障效果
+        setInterval(() => {
+            document.querySelectorAll('.glitch-name').forEach(name => {
+                if (Math.random() > 0.7) {
+                    name.style.animation = 'none';
+                    setTimeout(() => {
+                        name.style.animation = '';
+                    }, 100);
+                }
+            });
+        }, 3000);
+    </script>
+</body>
+</html>
